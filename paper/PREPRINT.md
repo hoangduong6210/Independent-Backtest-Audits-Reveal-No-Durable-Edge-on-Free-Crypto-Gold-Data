@@ -28,11 +28,15 @@ We do not claim a novel statistical method — the components (DSR, PBO/CSCV, RC
 
 ## 2. Related Work
 
-Skeptical backtesting protocols are well-established. Bailey & López de Prado (2014) introduced the Deflated Sharpe Ratio (DSR) to adjust for multiple testing; Bailey et al. (2015) formalized Probability of Backtest Overfitting (PBO) via CSCV. López de Prado (2018, AFML) devotes chapters to purging, embargo, and combinatorial cross-validation. Harvey (2019) and Harvey et al. (multiple) document the “factor zoo” and publication bias against negative results.
+Skeptical backtesting protocols are well-established. Bailey & López de Prado (2014) introduced the Deflated Sharpe Ratio (DSR) to adjust for multiple testing; Bailey et al. (2015) formalized Probability of Backtest Overfitting (PBO) via CSCV. Sullivan, Timmermann, and White (1999) applied White's Reality Check bootstrap to quantify data-snooping in technical trading rules. Harvey, Liu, and Zhu (2016) catalogued the proliferation of factors and argued for substantially higher significance thresholds. Romano and Wolf (2005) developed stepwise procedures that control family-wise error while respecting dependence. Bailey, Borwein, López de Prado, and Zhu (2014) demonstrated that backtest overfitting is achievable with only modest numbers of trials. López de Prado (2018, AFML) devotes chapters to purging, embargo, and combinatorial cross-validation. Harvey (2019) and Harvey et al. (multiple) document the “factor zoo” and publication bias against negative results. Lo (2002) clarified the sampling properties of Sharpe ratios under non-normality and dependence.
 
-On tabular data, Grinsztajn et al. (2022) and Shwartz-Ziv & Armon (2021) show tree ensembles frequently outperform deep learning—consistent with our finding that small LGBM on lagged TA + funding features was competitive with (and often less harmful than) LSTM meta-labelers.
+On tabular data, Grinsztajn et al. (2022) and Shwartz-Ziv & Armon (2021) show tree ensembles frequently outperform deep learning; Borisov et al. (2021) survey the challenges of applying deep nets to heterogeneous tabular inputs without extensive preprocessing—consistent with our finding that small LGBM on lagged TA + funding features was competitive with (and often less harmful than) LSTM meta-labelers.
 
-Microstructure literature on free proxies is sobering: dm13450 reports order-flow imbalance Sharpe ~0.12 pre-cost; grantreed1 stress-tests show catastrophic drawdowns once costs and realistic execution are added. Funding arbitrage papers and practitioner notes (BIS, arXiv) repeatedly warn of liquidity squeezes, regime compression post-2022, and the necessity of margin/liquidation modeling. Vol targeting (Moreira & Muir) is known to reduce drawdowns but often fails to improve Sharpe after rebalancing costs in high-frequency regimes.
+Microstructure literature on free proxies is sobering: Kyle (1985) modeled how informed trading and liquidity provision determine price impact in sequential auctions. Cont, Kukanov, and Stoikov (2014) established that order-flow imbalance explains short-horizon price changes linearly, with slope inversely related to depth. Easley, López de Prado, and O'Hara (2012) developed the VPIN metric for real-time flow toxicity. dm13450 reports order-flow imbalance Sharpe ~0.12 pre-cost; grantreed1 stress-tests show catastrophic drawdowns once costs and realistic execution are added. Funding arbitrage papers and practitioner notes (BIS, arXiv) repeatedly warn of liquidity squeezes, regime compression post-2022, and the necessity of margin/liquidation modeling. Vol targeting (Moreira & Muir, 2017) is known to reduce drawdowns but often fails to improve Sharpe after rebalancing costs in high-frequency regimes.
+
+In cryptocurrency markets, Makarov and Schoar (2020) document persistent cross-exchange arbitrage and limits to arbitrage even among major venues. On market efficiency, Fama (1970) articulated the efficient markets hypothesis in its weak, semi-strong, and strong forms, while Lo (2004) advanced the Adaptive Markets Hypothesis, which views efficiency as an evolutionary outcome that can vary over time and across assets; under such views, durable edges on purely public, low-cost data are expected to be rare after costs.
+
+For reproducibility, Ioannidis (2005) showed that most published research findings are likely false under common levels of bias, under-power, and flexibility in analysis. Gundersen, Gil, and Aha (2018) quantified documentation gaps that hinder reproducibility in AI research. Gu, Kelly, and Xiu (2020) illustrated the gains from modern machine-learning methods in cross-sectional equity pricing. Dixon, Halperin, and Bilokon (2020) survey the broader landscape of ML techniques applied to financial time series and decision problems. Sezer, Gudelek, and Ozbayoglu (2020) and Lim and Zohren (2021) review the application of deep learning specifically to financial time-series forecasting.
 
 Closest in spirit is AutoQuant (Deng, 2025, arXiv:2512.22476), an auditable expert-system framework for execution-constrained auto-tuning of cryptocurrency perpetual-futures strategies that encodes strict T+1 execution semantics, no-look-ahead funding alignment, realistic-cost Bayesian optimization, and a double-screening protocol over rolling windows plus a cost-sensitivity grid; it likewise documents that fee-only and zero-cost backtests materially overestimate annualized returns. Our work is complementary: rather than proposing a new method we (a) apply a formalized 7-gate checklist to both internal variants and one fully reproduced external strategy, (b) give explicit before/after numbers with code-line evidence, (c) are strictly honest on survivorship versus gate effects, and (d) report rigorous (non-proxy) DSR/PBO/RC/SPA on a synchronized BTC-1h returns matrix.
 
@@ -301,6 +305,27 @@ The external stat-arb momentum reproduction (Section 5.4) was performed on the f
 - Shwartz-Ziv, R., & Armon, A. (2021). Tabular Data: Deep Learning is Not All You Need. arXiv:2106.03253.
 - dm13450 (blog). Order Flow Imbalance.
 - Public external repo: https://github.com/shreejitverma/Statistical-Arbitrage-Reversal-and-Momentum-Strategies
+- Arnott, R., Harvey, C. R., & Markowitz, H. (2019). A Backtesting Protocol in the Era of Machine Learning. The Journal of Financial Data Science.
+- Bailey, D. H., Borwein, J. M., López de Prado, M., & Zhu, Q. J. (2014). Pseudo-Mathematics and Financial Charlatanism: The Effects of Backtest Overfitting on Out-of-Sample Performance. Notices of the American Mathematical Society.
+- Borisov, V., et al. (2021). Deep Neural Networks and Tabular Data: A Survey. arXiv:2110.01889.
+- Cont, R., Kukanov, A., & Stoikov, S. (2014). The Price Impact of Order Book Events. Journal of Financial Econometrics, 12(1), 47–88.
+- Dixon, M. F., Halperin, I., & Bilokon, P. (2020). Machine Learning in Finance: From Theory to Practice. Springer.
+- Easley, D., López de Prado, M., & O'Hara, M. (2012). Flow Toxicity and Liquidity in a High Frequency World. The Review of Financial Studies, 25(5), 1457–1493.
+- Fama, E. F. (1970). Efficient Capital Markets: A Review of Theory and Empirical Work. The Journal of Finance, 25(2), 383–417.
+- Gundersen, O. E., Gil, Y., & Aha, D. W. (2018). On Reproducible AI: Towards Reproducible Research, Open Science, and Digital Scholarship in AI Publications. AI Magazine, 39(3), 56–68.
+- Gu, S., Kelly, B., & Xiu, D. (2020). Empirical Asset Pricing via Machine Learning. The Review of Financial Studies, 33(5), 2223–2273.
+- Harvey, C. R., Liu, Y., & Zhu, H. (2016). ... and the Cross-Section of Expected Returns. The Review of Financial Studies, 29(1), 5–68.
+- Ioannidis, J. P. A. (2005). Why Most Published Research Findings Are False. PLoS Medicine, 2(8), e124.
+- Kyle, A. S. (1985). Continuous Auctions and Insider Trading. Econometrica, 53(6), 1315–1336.
+- Lim, B., & Zohren, S. (2021). Time-series forecasting with deep learning: a survey. Philosophical Transactions of the Royal Society A, 379(2194), 20200209.
+- Lo, A. W. (2002). The Statistics of Sharpe Ratios. Financial Analysts Journal, 58(4), 36–52.
+- Lo, A. W. (2004). The Adaptive Markets Hypothesis: Market Efficiency from an Evolutionary Perspective. The Journal of Portfolio Management, 30(5), 15–29.
+- Makarov, I., & Schoar, A. (2020). Trading and Arbitrage in Cryptocurrency Markets. Journal of Financial Economics, 135(2), 293–319.
+- Markowitz, H. (1952). Portfolio Selection. The Journal of Finance, 7(1), 77–91.
+- Moreira, A., & Muir, T. (2017). Volatility-Managed Portfolios. The Journal of Finance, 72(4), 1611–1644.
+- Romano, J. P., & Wolf, M. (2005). Stepwise Multiple Testing as Formalized Data Snooping. Econometrica, 73(4), 1237–1282.
+- Sezer, O. B., Gudelek, M. U., & Ozbayoglu, A. M. (2020). Financial time series forecasting with deep learning: A systematic literature review: 2005–2019. Applied Soft Computing, 90, 106181.
+- Sullivan, R., Timmermann, A., & White, H. (1999). Data-Snooping, Technical Trading Rule Performance, and the Bootstrap. The Journal of Finance, 54(5), 1647–1691.
 
 ---
 
