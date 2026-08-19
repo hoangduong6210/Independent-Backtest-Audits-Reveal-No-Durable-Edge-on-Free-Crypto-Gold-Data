@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this audit or its evidence bundle, please cite the preprint."
+title: "Independent Backtest Audits Reveal No Durable Edge on Free Crypto/Gold Data"
+type: software
+version: 1.0.0
+date-released: 2026-06-30
+authors:
+  - family-names: Hoang
+    given-names: Duong Viet
+    email: Hoangduong4316@icloud.com
+    affiliation: Da-Yeh University
+repository-code: "https://github.com/hoangduong6210/Independent-Backtest-Audits-Reveal-No-Durable-Edge-on-Free-Crypto-Gold-Data"
+license: MIT
+preferred-citation:
+  type: article
+  title: "Independent Backtest Audits Reveal No Durable Edge on Free Crypto/Gold Data: A Negative Baseline, Two Inflated Claims, and a Validation Checklist"
+  authors:
+    - family-names: Hoang
+      given-names: Duong Viet
+  year: 2026

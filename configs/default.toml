@@ -1,0 +1,22 @@
+[study]
+release_id = "20260630_public_release"
+seed = 42
+benchmark = "zero_return"
+
+[data]
+matrix = "data/processed/returns_matrix.csv"
+frequency = "1h"
+assets = ["BTCUSDT"]
+observations = 21949
+variants = 4
+
+[bootstrap]
+replications = 2000
+average_block_bars = 24
+
+[cscv]
+blocks = 10
+
+[gates]
+minimum_independent_bets = 30
+dsr_confidence = 0.95

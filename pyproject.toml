@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "backtest-audit"
+version = "1.0.0"
+description = "Auditable statistics for negative-result crypto and gold backtests"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Duong Viet Hoang", email = "Hoangduong4316@icloud.com"}]
+dependencies = ["numpy>=1.26,<3", "pandas>=2.2,<3", "scipy>=1.11,<2"]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10", "PyYAML>=6,<7"]
+paper = ["markdown>=3.6,<4", "matplotlib>=3.8,<4", "pypdf>=6,<7", "xhtml2pdf>=0.2.11,<1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "src"]
+testpaths = ["tests"]
+addopts = "-q"

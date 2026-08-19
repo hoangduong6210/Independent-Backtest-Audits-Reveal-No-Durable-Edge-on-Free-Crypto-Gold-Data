@@ -1,82 +1,101 @@
-# Independent Backtest Audits Reveal No Durable Edge on Free Crypto/Gold Data
+# Independent backtest audits on free crypto and gold data
 
-### A Negative Baseline, Two Inflated Claims, and a Validation Checklist
+This repository is the auditable research release for a negative-result study of
+algorithmic trading strategies built from free Binance and Yahoo Finance data.
+Sixteen strategy variants and three unusually strong performance claims are
+re-evaluated under realistic costs, walk-forward validation, a seven-gate audit,
+and multiple-testing-aware statistics.
 
-[![License: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE)
-[![Paper: CC BY 4.0](https://img.shields.io/badge/Paper-CC%20BY%204.0-green.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](code/requirements.txt)
-[![Reproducible](https://img.shields.io/badge/Reproducible-one--command-success.svg)](#reproduce)
+> **Historical project notice.** The core research campaign was conducted from
+> **28-30 June 2026**, and the original public repository release was committed
+> on **30 June 2026**. Manuscript revisions continued through **17 July 2026**.
+> Changes dated **19 August 2026** are repository preservation, documentation,
+> and editorial maintenance; they do not represent a new parallel research
+> campaign. See [`HISTORY.md`](HISTORY.md) for the evidence-backed timeline.
 
-**Duong Viet Hoang** · Da-Yeh University · `Hoangduong4316@icloud.com`
+The repository separates the scientific record from the historical workspace.
+Only disclosure-safe evidence is part of the Git release; the pre-restructure
+workspace is preserved locally under `archive/legacy-source/` and is ignored by
+Git.
 
-📄 **[Read the paper (PDF)](paper/PREPRINT.pdf)** · [Markdown source](paper/PREPRINT.md)
+## Main result
 
----
+No tested strategy demonstrates a durable edge after realistic frictions.
 
-## Abstract
+| Finding | Result | Interpretation | Evidence |
+|---|---:|---|---|
+| BTC hourly family | Sharpe -0.57 to -2.83 | All four aligned variants lose after costs | [E1](wiki/Evidence-Sources.md#e1) |
+| Deflated Sharpe Ratio | maximum 0.00347 | Far below the 0.95 confidence threshold | [E2](wiki/Evidence-Sources.md#e2) |
+| White Reality Check | p = 1.000 | Does not reject no edge | [E2](wiki/Evidence-Sources.md#e2) |
+| Hansen SPA | p = 0.9945 | Does not reject no edge | [E2](wiki/Evidence-Sources.md#e2) |
+| XAU audit | +173% to -32.7% | Cost subtraction and sizing reverse the claim | [E3](wiki/Evidence-Sources.md#e3) |
+| Spot-perpetual basis | Sharpe about 12 to below 2 | Sampling, margin, capital, and fills explain the gap | [E4](wiki/Evidence-Sources.md#e4) |
+| External momentum | Sharpe 1.94 to 0.12-0.42 | Reproduction does not support the published claim | [E5](wiki/Evidence-Sources.md#e5) |
 
-Retail quantitative researchers on free public data (Binance 1h klines + funding/OI/CVD; Yahoo
-GC=F daily) face a deceptively hard environment. Across an empirical campaign spanning LightGBM
-triple-barrier, LSTM meta-labeling, price-action rules, multi-timeframe filters, funding mean-reversion,
-spot-perp basis harvesting, volatility targeting, and micro trade-flow, **no strategy sustains a
-Profit Factor > 1 after realistic costs**. An independent, code-backed **7-gate audit protocol** plus
-rigorous, non-proxy statistics (Deflated Sharpe Ratio, CSCV-PBO, White's Reality Check, Hansen SPA)
-catch **three inflated Sharpe claims** and confirm the negative result: on the one synchronized BTC-1h
-return matrix, *H₀ "no edge over a zero benchmark" is not rejected*.
+![Campaign funnel](figures/generated/fig9_campaign_funnel.png)
 
-## Key results at a glance
+## Start here
 
-| Finding | Evidence |
+| Need | Document |
 |---|---|
-| No durable edge on free data | 16 variants, all Profit Factor ≤ 1.12 after costs (only one marginal cell) |
-| Inflated claim #1 — XAU | +173% collapses to **−33%** once costs are truly subtracted |
-| Inflated claim #2 — spot-perp basis | Sharpe ~12 collapses to **< 2** once liquidation/sampling are modeled |
-| Inflated claim #3 — external public strategy | Claimed Sharpe **1.94** reproduces at **0.12–0.42** |
-| Statistical confirmation | DSR ≈ 0 · CSCV-PBO 0.032 · **White RC p = 1.000** · **Hansen SPA p = 0.9945** |
+| Research overview and navigation | [Wiki index](wiki/Wiki-Index.md) |
+| Full scientific argument | [Current manuscript](paper/current_state/manuscript.md) |
+| Supported and unsupported claims | [Claims and limits](wiki/Claims-and-Limits.md) |
+| Numerical source map | [Evidence sources](wiki/Evidence-Sources.md) |
+| Reproduction procedure | [Reproduce and audit](wiki/Reproduce-and-Audit.md) |
+| Data origin and integrity | [Data provenance](docs/DATA_PROVENANCE.md) |
+| When the research was conducted | [Project history](HISTORY.md) |
+| Historical and current paper states | [Paper directory](paper/README.md) |
 
-<p align="center">
-  <img src="paper/figures/fig9_campaign_funnel.png" width="560" alt="Campaign funnel: 16+ variants filtered to zero durable edge">
-</p>
+## Evidence scope
 
-## Repository layout
+The evidence supports a negative baseline for the tested public datasets,
+periods, strategies, and execution assumptions. It does not prove that all
+public-data strategies are unprofitable, that no edge can exist in other
+markets or regimes, or that the tested cost model represents every venue.
+The joint CSCV, Reality Check, and SPA results apply only to the four BTC-hourly
+variants sharing the same 21,949-bar time axis.
 
-```
-paper/    PREPRINT.pdf · PREPRINT.md · figures/ (12 figures)
-code/     make_figures.py · rigorous_stats.py · run_stats.py · build_pdf.py · run_all.{sh,ps1} · requirements.txt
-data/     returns_matrix.csv (aligned BTC-1h variant net returns) · data_manifest.json (SHA-256)
-```
+## Reproduce the statistical result
 
-## Reproduce
+Python 3.11 or newer is recommended.
 
 ```bash
-cd code
-pip install -r requirements.txt
-bash run_all.sh        # Windows: powershell -ExecutionPolicy Bypass -File run_all.ps1
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e '.[test]'
+python experiments/run_statistics.py --output results/audit/statistics.json
+python scripts/validate_release.py
+pytest
+python wiki/build.py check
 ```
 
-- `make_figures.py` regenerates every figure deterministically.
-- `run_stats.py` recomputes the load-bearing statistics (DSR / CSCV-PBO / White RC / Hansen SPA) on
-  `data/returns_matrix.csv` and reproduces the Section 5.5 numbers exactly.
-- `build_pdf.py` rebuilds `paper/PREPRINT.pdf`. All scripts fix random seeds for bit-stable output.
+Figure and PDF regeneration requires the optional `paper` dependencies:
 
-Raw OHLCV/funding inputs are freely re-downloadable from Binance and Yahoo Finance and are not shipped;
-`data/returns_matrix.csv` carries the aligned per-bar returns behind the load-bearing statistical result
-(SHA-256 in `data/data_manifest.json`).
-
-## Citation
-
-```bibtex
-@misc{hoang2026backtestaudits,
-  author       = {Duong Viet Hoang},
-  title        = {Independent Backtest Audits Reveal No Durable Edge on Free
-                  Crypto/Gold Data: A Negative Baseline, Two Inflated Claims,
-                  and a Validation Checklist},
-  year         = {2026},
-  note         = {Preprint},
-  howpublished = {\url{https://github.com/hoangduong6210/Independent-Backtest-Audits-Reveal-No-Durable-Edge-on-Free-Crypto-Gold-Data}}
-}
+```bash
+python -m pip install -e '.[paper]'
+python scripts/generate_current_paper_figures.py
+python scripts/build_current_paper.py
 ```
 
-## License
+## Repository map
 
-Code: [MIT](LICENSE). Manuscript and figures: CC BY 4.0.
+| Path | Contents |
+|---|---|
+| `HISTORY.md` | Evidence-backed research and repository-maintenance timeline |
+| `wiki/` | Research narrative, evidence ledger, status, and navigation |
+| `src/backtest_audit/` | Statistical audit implementation |
+| `experiments/` | Reproducible scientific entry points |
+| `configs/` | Declared environment and experiment settings |
+| `data/` | Data manifest, provenance, and aligned processed returns |
+| `results/` | Current pointer, audit output, and frozen release evidence |
+| `figures/` | Generated public figures and source policy |
+| `paper/` | Current manuscript and conference snapshot |
+| `docs/` | Protocol, provenance, claim boundaries, and release policy |
+| `tests/` | Statistical, integrity, navigation, and release-contract tests |
+| `archive/` | Local historical workspace; excluded from Git |
+
+Citation metadata are in [`CITATION.cff`](CITATION.cff). Code is MIT licensed;
+the manuscript and figures are CC BY 4.0. Upstream market data retain their
+original terms.

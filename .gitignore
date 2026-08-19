@@ -3,3 +3,11 @@ __pycache__/
 code/_fonts/
 .DS_Store
 Thumbs.db
+.venv/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+scripts/_fonts/
+archive/legacy-source/
+results/audit/*.json

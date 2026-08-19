@@ -1,0 +1,260 @@
+%% ICAIF '26 submission – ACM sigconf, double-blind (anonymous).
+%% Build on Overleaf with the latest acmart template. Compile: pdflatex -> pdflatex.
+%% HARD LIMIT: 8 pages including figures AND references. No appendices/supplementary (ICAIF '26 rule).
+\documentclass[sigconf,anonymous]{acmart}
+
+\settopmatter{printacmref=false}
+\setcopyright{none}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\pagestyle{plain}
+\citestyle{acmnumeric}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{Skeptical Audits of Internal and External Backtest Claims Reveal No Durable Edge on Free Crypto/Gold Data: A Negative Baseline, Two Inflated Claims, and a Validation Checklist}
+
+\author{Anonymous Author(s)}
+\affiliation{%
+  \institution{Submission under double-blind review}
+  \country{}
+}
+
+\begin{abstract}
+We conduct a cost-honest campaign on free public data—hourly crypto klines with funding, open interest and CVD proxies, and daily gold futures—across eleven experiments spanning seven method families. Under walk-forward purged validation, causal features, and realistic costs subtracted with fixed per-$R$ risk ($1\%$; $2\%$ for the multi-timeframe variant), no deployable configuration sustains $\mathrm{PF}{>}1$ across the realistic cost band (one XAU cell is marginally above one only at the band's low end). We contribute a seven-gate skeptical audit protocol and apply it to internal variants and one rule-level re-implemented external claim, catching two inflated cases: a gold strategy claiming $+173\%$ collapses to $-33\%$ once costs and sizing are realistic; a basis trade claiming Sharpe ${\sim}12$ falls to APR near zero under hourly sampling, two-leg capital, and realistic maker execution. An external momentum claim (Sharpe $1.94$) reproduces at $0.12$–$0.42$ (one slice negative)—a gap tied to survivorship and realism gaps before our gates apply. On the one synchronized family (four hourly-BTC strategies, $T{=}21{,}949$), every Sharpe is negative, every Deflated Sharpe Ratio is ${\approx}0$, White RC $p{=}1.000$ and Hansen SPA $p{=}0.994$: the no-edge null is not rejected. The contribution is a validation checklist and a transparent, reproducible negative baseline, not a new method.
+\end{abstract}
+
+\keywords{backtest overfitting, Deflated Sharpe Ratio, reproducibility, cryptocurrency, technical analysis, negative results, survivorship bias}
+
+\maketitle
+
+\section{Introduction}
+Retail quantitative researchers operating on free public OHLCV, funding rates, and basic order-flow proxies (CVD, open interest) in crypto and gold futures face a deceptively difficult environment. Apparent edges discovered in-sample or under optimistic accounting frequently vanish once costs are truly subtracted from equity, path-dependent risks (liquidation, intra-period volatility) are modeled, capital for multi-leg strategies is correctly normalized, and forward regimes are isolated (Figure~\ref{fig:iceberg}).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures_concept/fig_iceberg.png}
+  \caption{The recurring framing: a small visible ``apparent edge'' sits atop a much larger submerged mass of realism costs—execution and slippage, liquidation and margin, survivorship, and multiple-testing inflation. The audit protocol makes the submerged mass explicit.}
+  \label{fig:iceberg}
+\end{figure}
+
+This paper consolidates an eleven-experiment empirical campaign that systematically tested machine-learning classifiers (gradient-boosted $P(\text{win})$, LSTM meta-labels), classical rules, multi-timeframe filters, mean reversion on funding, spot–perpetual basis harvesting, volatility targeting, and micro-flow signals. The unifying result after all realism patches is the absence of durable positive expectancy: no configuration sustains a profit factor $\mathrm{PF}>1.0$ under walk-forward, causal features, and explicit costs on the tested free datasets.
+
+The most valuable asset produced is not a ``winning'' strategy but a skeptical, code-backed audit protocol that caught two inflated internal claims (gold $+173\%$; basis Sharpe ${\sim}12$) and failed to reproduce a third, external public claim (momentum Sharpe $1.94$). We formalize seven gates, and on the one family that admits a synchronized returns matrix we compute the rigorous Deflated Sharpe Ratio (DSR)~\cite{bailey2014dsr}, CSCV probability of backtest overfitting (PBO)~\cite{bailey2015pbo}, White Reality Check~\cite{white2000}, and Hansen SPA~\cite{hansen2005}. We frame results honestly: external non-reproducibility is driven largely by survivorship and missing realism, not merely our gates; and the inflated internal cells reflect an accounting bug (gold) and optimistic pre-patch execution assumptions (basis), not adversarial fabrication.
+
+We do not claim a novel statistical method—the components are due to Bailey, L\'opez de Prado, Harvey, White, and Hansen. The contribution is a \emph{formalized validation checklist} with worked before/after case studies and a transparent, fully reproducible negative baseline on free data, addressing the reproducibility literature in quantitative finance.
+
+\section{Related Work}
+Skeptical backtesting protocols are well established. Bailey and L\'opez de Prado~\cite{bailey2014dsr} introduced the DSR to adjust for multiple testing; Bailey et al.~\cite{bailey2015pbo} formalized PBO via CSCV; L\'opez de Prado~\cite{lopezdeprado2018} devotes chapters to purging, embargo, and combinatorial cross-validation; Harvey~\cite{harvey2019} documents the ``factor zoo'' and publication bias against negative results. The multiple-comparison null is supplied by White's Reality Check~\cite{white2000} and Hansen's SPA~\cite{hansen2005}, with the stationary bootstrap of Politis and Romano~\cite{politis1994}. On tabular data, tree ensembles frequently outperform deep learning~\cite{grinsztajn2022,shwartzziv2021}—consistent with our internal finding that a small gradient-boosted model on lagged technical and funding features was competitive with, and often less harmful than, LSTM meta-labelers. Microstructure work on free proxies is sobering: published order-flow-imbalance signals yield only marginal pre-cost Sharpe, and stress tests show catastrophic drawdowns once costs and realistic execution are added. Funding-arbitrage practice repeatedly warns of liquidity squeezes and post-2022 regime compression, and volatility targeting~\cite{moreira2017} reduces drawdowns yet often fails to improve Sharpe after rebalancing costs at high frequency. The crypto assets we test are liquid majors whose aggregate return behaviour and arbitrage frictions are well documented~\cite{liu2021,makarov2020}; the same literature stresses that momentum and network-attention effects, while real in gross terms, are fragile once realistic execution and non-stationary regimes are imposed—precisely the failure mode our external reproduction exhibits. Closest in spirit is an auditable expert-system framework for execution-constrained auto-tuning of perpetual-futures strategies~\cite{deng2025}, which likewise documents that fee-only and zero-cost backtests materially overestimate returns; our work is complementary in applying a formalized checklist to both internal variants and one rule-level re-implemented external strategy, with explicit before/after numbers.
+
+\section{Data and Methods}
+\textbf{Data (all free/public).} Hourly and daily spot/futures klines for BTC, ETH and SOL (multi-year windows); exchange funding-rate, taker-buy, and open-interest history; daily gold futures (2000–2026); and public one-minute aggregated trades for micro flow.
+
+\textbf{Labeling and modeling.} Triple-barrier labels (vertical $8$–$16$ bars, $k{=}1.2$–$1.5$ ATR) or vertical for trend; gradient-boosted trees or a small LSTM for $P(\text{win})$ or direction. Walk-forward with train windows of $1200$–$5500$ bars, test $250$–$3300$ (the LSTM uses the largest folds, $\sim3300$ bars; the tree/rule family uses $250$–$820$), embargo $3$–$5$ bars; features lagged one bar; no future leakage.
+
+\textbf{Costs and sizing.} Round-trip $0.10\%$ (crypto; $0.12\%$ for the LSTM, rule, and multi-timeframe variants, which apply $0.06\%$/side) / $0.10$–$0.20\%$ (gold; the $0.05\%$ lower anchor used in the gold cost sweep is an optimistic configured cost, below the realistic band) \emph{subtracted from per-trade PnL or equity}. Fixed $1\%$ equity risk per $R$ ($2\%$ for the multi-timeframe variant); no optimistic $3\%$ compounding. Basis adds ${\sim}11$ bp round-trip turnover with a $50\%$ maker assumption.
+
+\textbf{Entry timing.} All risk-reward variants enter at the \emph{close of the signal bar} with one-bar-lagged features; this close-fill is mildly look-ahead-favorable. The conservative next-open alternative was tested for gold and degraded it (win-rate $52.93\%{\to}50.38\%$, gross PF $1.225{\to}1.137$; with $0.2\%$ cost and $1\%$ sizing, total return ${\to}-36.99\%$). Reported PFs therefore sit at the optimistic end of the entry-timing spectrum; the realistic corner is typically worse.
+
+\textbf{Purging and leakage control.} Training labels are purged: any sample whose triple-barrier resolves after $\mathrm{train\_end}-\mathrm{vertical}$ is dropped, so no label straddles the embargo gap. Features are strictly lagged and computed causally; no target-derived quantity enters the feature set. Every script fixes a single seed and pins library versions for bit-stable reproduction.
+
+\textbf{External reproduction.} An exact rule port of a public 120-day cross-sectional momentum strategy (rank, demean, $5$ bps cost) on eight long-history symbols, over four period slices, using real daily closes. The eight symbols are the liquid majors with continuous history since 2018+; the original claim likely drew on a broader, survivorship-tilted universe whose exact composition is not recoverable.
+
+\section{The Audit Protocol}
+We formalize seven gates in a public audit script. A strategy passes only if all are satisfied.
+\begin{enumerate}\itemsep1pt
+  \item \textbf{cost\_subtracted\_real}—costs actually subtracted from equity/PnL, not merely computed.
+  \item \textbf{margin\_liq\_model}—explicit margin, maintenance margin, and liquidation penalty when leverage or derivatives are used.
+  \item \textbf{multi\_leg\_capital}—correct capital normalization across legs.
+  \item \textbf{sampling\_resolution}—frequency sufficient to capture path risk (hourly preferred over 8h/daily for crypto).
+  \item \textbf{regime\_forward\_test}—a recent/forward slice (2024+) evaluated separately.
+  \item \textbf{min\_independent\_bets}—at least $30$ time-disjoint bets for DSR/PBO validity.
+  \item \textbf{maker\_taker\_slippage}—realistic fill mix ($50\%$ maker) with slippage sensitivity.
+\end{enumerate}
+Post-gate, on the family that admits a synchronized returns matrix, we compute rigorous DSR / CSCV-PBO / White RC / Hansen SPA (\S\ref{sec:rigor}); elsewhere we report per-variant DSR only, and flag limitations throughout.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig7_audit_7gate_flow.png}
+  \caption{The seven-gate audit funnel. Attractive raw backtests are progressively eliminated by cost subtraction, margin/liquidation modeling, multi-leg capital, sampling resolution, forward-regime isolation, a minimum-independent-bets threshold, and a realistic maker/taker-plus-slippage mix, down to the negative baseline.}
+  \label{fig:funnel}
+\end{figure}
+
+\section{Results}
+\subsection{Negative Baseline: No Durable $\mathrm{PF}{>}1$}
+Across the eleven-experiment campaign, Table~\ref{tab:baseline} lists the representative variant per family after realistic costs and $1\%$–$2\%$ sizing under walk-forward OOS (Figure~\ref{fig:pf}); every variant sits below unity (maximum $0.94$, GBT barrier BTC). The one cell that reaches $\mathrm{PF}{>}1$ is the XAU risk-reward variant: it is marginally positive at the low end of realistic cost (PF $1.131$ at $0.05\%$; $+4.6\%$ at $0.10\%$, $n{=}410$) but breaks even at $0.112\%$ and loses at higher realistic costs ($0.15$–$0.20\%$); single-asset and at the razor edge of the realistic band, it is not a deployable edge. The $R$-exit risk-reward variants on BTC/ETH/SOL all cluster at $\mathrm{PF}\approx 0.73$–$0.82$ with large drawdowns ($56.9\%$, $41.5\%$, $34.2\%$); the price-action and multi-timeframe variants draw down further ($61.8\%$, $88.2\%$). Funding and CVD features rank high in feature importance yet never translate into $\mathrm{PF}{>}1$ net of costs.
+
+\begin{table}[t]
+  \caption{Representative variants after realistic costs ($0.10\%$ round-trip; $0.12\%$ for the LSTM/rule/multi-timeframe rows) and $1\%$ fixed sizing ($2\%$ for the multi-timeframe row), walk-forward OOS; every cell is read directly from the per-variant real-run output. Sharpe is annualized from per-bar returns (hourly bars). PF is uniformly below unity (maximum $0.94$, GBT barrier BTC). These are per-asset walk-forward backtests, distinct from the synchronized hourly matrix of Table~\ref{tab:dsr}.}
+  \label{tab:baseline}
+  \small
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Variant & PF & WR & Sharpe (ann.) & MaxDD & $n$ \\
+    \midrule
+    GBT barrier (BTC)        & $0.944$ & $54.6\%$ & $-0.17$ & $0.4\%$  & $141$ \\
+    LSTM meta (BTC)          & $0.798$ & $51.4\%$ & $-1.15$ & $20.4\%$ & $284$ \\
+    Price-action rule (BTC)  & $0.322$ & $18.1\%$ & $-4.17$ & $61.8\%$ & $171$ \\
+    Multi-TF H4$\to$H1 (BTC) & $0.444$ & $22.8\%$ & $-3.23$ & $88.2\%$ & $232$ \\
+    Risk-reward (BTC)        & $0.730$ & $51.6\%$ & $-1.71$ & $56.9\%$ & $512$ \\
+    Risk-reward (ETH)        & $0.815$ & $51.8\%$ & $-1.02$ & $41.5\%$ & $417$ \\
+    Risk-reward (SOL)        & $0.801$ & $47.3\%$ & $-1.01$ & $34.2\%$ & $338$ \\
+    TA+funding+CVD (BTC)     & $0.668$ & $51.9\%$ & $-0.94$ & $22.9\%$ & $106$ \\
+    Asym.\ barrier (BTC)     & $0.659$ & $29.2\%$ & $-2.83$ & $0.8\%$  & $744$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig1_pf_variants.png}
+  \caption{Profit factor across the representative variants after realistic costs and $1\%$ fixed sizing ($2\%$ for the multi-timeframe variant), walk-forward OOS. All values lie beneath the $\mathrm{PF}{=}1$ line (maximum $0.94$).}
+  \label{fig:pf}
+\end{figure}
+
+\textbf{Cost sensitivity (gold).} At fixed $1\%$ sizing the gold variant crosses break-even near a $0.112\%$ round-trip cost (Table~\ref{tab:cost}). Realistic gold-futures round-trip cost ($0.10$–$0.20\%$) straddles or exceeds break-even, so the strategy is not deployable. Crypto variants at their round-trip cost ($0.10\%$; $0.12\%$ for the LSTM/rule/multi-timeframe variants) already sit below $\mathrm{PF}{=}1$, so their break-even cost is \emph{below} realistic crypto fees.
+
+\begin{table}[t]
+  \caption{Gold total return versus round-trip cost at fixed $1\%$ sizing. Break-even is near $0.112\%$; realistic gold-futures cost straddles or exceeds it. Intermediate cells are linear interpolations between two documented anchors ($0.05\%$, $0.20\%$).}
+  \label{tab:cost}
+  \small
+  \begin{tabular}{lr}
+    \toprule
+    Round-trip cost & Gold total return ($1\%$ sizing) \\
+    \midrule
+    $0.05\%$ & $+23.3\%$ (PF $1.131$) \\
+    $0.08\%$ & $+12.1\%$ \\
+    $0.10\%$ & $+4.6\%$ \\
+    $\mathbf{0.112\%}$ & $\mathbf{0.0\%}$ (break-even) \\
+    $0.15\%$ & $-14.0\%$ \\
+    $0.20\%$ & $-32.7\%$ (PF ${\sim}0.83$) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Case Study 1: Gold $+173\%$ Is an Accounting Bug}
+The original claim on daily gold futures: $410$ trades, win-rate $52.9\%$, gross PF ${\sim}1.23$, total return $+173\%$, MaxDD $51.7\%$, Sharpe ${\sim}0.36$ (under $3\%$-risk compounding and a $0.03\%$ cost). After patches: at $0.2\%$ cost with $3\%$ risk, $+23\%$; at $0.2\%$ cost with $1\%$ fixed sizing (fully realistic), $\mathbf{-32.7\%}$ (Sharpe $-0.34$); at next-open entry, $-37\%$ (Figure~\ref{fig:xau}). The gold variant's own win-rate stays near $52.9\%$ across these patches; its collapse is driven by cost and sizing, not barrier geometry. The inflation was an accounting bug—costs were computed but never subtracted from equity, compounded at an optimistic $3\%$, under a low assumed gold-futures cost—not adversarial fabrication; the bug is documented and reproducible from the patch sequence.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig2_xau_equity.png}
+  \caption{Gold (daily futures, risk-reward) equity curves: the original $+173\%$ claim versus the post-patch realistic run ($1\%$ sizing, $0.2\%$ cost, $-32.7\%$). Costs computed-but-not-subtracted, optimistic compounding, and a low assumed cost produced the inflated curve.}
+  \label{fig:xau}
+\end{figure}
+
+\subsection{Case Study 2: Basis Sharpe ${\sim}12 \to$ negative with Liquidation}
+The original spot–perpetual basis run (8h sampling, multi-year, gross): APR $8$–$11\%$, Sharpe $11.8$–$13.9$, MaxDD ${<}2\%$, $7$–$11$ entries, ${\sim}2$-year holds, $100\%$ maker assumed—and $0/7$ gates passed. Repatched to 2024–2026 (hourly, margin/liquidation, two-leg capital, $50\%$ maker): APR ${\approx}-0.31\%$, daily Sharpe negative ($-1.9$ to $-1.3$ across $50\%$-maker configs; only the unrealistic $100\%$-maker-optimistic cell turns positive, $+1.9$), liquidation events in most configurations, and only $1$–$2$ entries—statistically meaningless (Figure~\ref{fig:basis}). The gross-to-patched gap reflects optimistic pre-patch execution assumptions (coarse sampling that hides intra-period volatility, single-leg capital, $100\%$ maker, a pre-2024 funding regime), not deliberate distortion.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig3_basis_sharpe.png}
+  \caption{Spot–perpetual basis Sharpe by configuration: the original 8h gross run (Sharpe $11.8$–$13.9$) versus the patched hourly, margin/liquidation, two-leg-capital, 2024+ runs (daily Sharpe $-1.9$ to $-1.3$ at $50\%$ maker; the $100\%$-maker-optimistic cell reaches $+1.9$; APR ${\approx}-0.31\%$). Coarse sampling and optimistic execution manufactured the apparent edge.}
+  \label{fig:basis}
+\end{figure}
+
+\subsection{Case Study 3 (External): Momentum Sharpe $1.94 \to 0.12$–$0.42$}
+We exactly re-implement, at the rule level, a publicly described 120-day cross-sectional long–short momentum rule ($5$ bps turnover) on a recoverable eight-coin liquid universe. The rule and its headline (``Sep 2020–present'': annual return $155.8\%$, Sharpe $1.94$) circulated publicly; the original coin universe could not be exactly recovered, so we run the rule on the eight persistent majors with continuous history since 2018+, which is the relevant comparison. Reproduced on real data, the Sharpe collapses across every slice (Table~\ref{tab:ext}, Figure~\ref{fig:ext}): full sample (2018+) $0.27$; claim-window $0.12$; recent-best (2023+) $0.42$; 2021–2024 $-0.12$; while BTC buy-and-hold on the same recent window returns $0.74$—simple holding dominates. Our harness reports SR ${\sim}0.50$, DSR $0.40$, and overall gates \textsc{false} (sampling and maker/slippage fail).
+
+\begin{table}[t]
+  \caption{External momentum claim versus exact reproduction on real exchange data. The ${\sim}5$–$16\times$ Sharpe gap opens across every period slice (the claim-window slice alone is a $16\times$ gap); one reproduced slice (2021–2024) is negative; buy-and-hold dominates on the recent window.}
+  \label{tab:ext}
+  \small
+  \begin{tabular}{lrr}
+    \toprule
+    Slice & Ann.\ return & Sharpe \\
+    \midrule
+    Public claim & $155.8\%$ & $\mathbf{1.94}$ \\
+    Reproduced, full (2018+) & $9.3\%$ & $0.27$ \\
+    Reproduced, claim window & $4.6\%$ & $0.12$ \\
+    Reproduced, recent-best (2023+) & $7.7\%$ & $0.42$ \\
+    Reproduced, 2021–2024 & $-2.3\%$ & $-0.12$ \\
+    BTC buy-and-hold (recent) & $28.9\%$ & $0.74$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig6_external_sr.png}
+  \caption{External stat-arb momentum: claimed Sharpe ($1.94$) versus reproduced Sharpe (claim-window $0.12$, recent-best $0.42$, harness $0.50$) and BTC buy-and-hold ($0.74$) on the same window. The gap opens before any gate is applied.}
+  \label{fig:ext}
+\end{figure}
+
+\emph{Honest framing.} The ${\sim}5$–$16\times$ gap between the claimed and reproduced Sharpe opens \emph{even before} the gates apply: re-running the public rule on the full real history of the same exchange already loses most of the edge (and one 2021–2024 slice is negative). We attribute the gap to survivorship and realism gaps, but survivorship is \emph{not isolated}: the original universe is unrecoverable, so we cannot run the rule on a reconstructed broader set of since-delisted alts to confirm how much of the gap it closes. What we can show is that on a recoverable eight-coin set of persistent majors (continuous history since 2018+) plus realistic execution, the economically meaningful edge is already gone (reproduced Sharpes of $0.12$–$0.42$ sit well below BTC buy-and-hold at $0.74$ on the same window). The gates then formalize these issues; the root discrepancy is data selection and missing realism, not solely our checklist.
+
+\subsection{Statistical Rigor on the Synchronized BTC-Hourly Family}\label{sec:rigor}
+The rigorous joint statistics are valid only on the one family that admits a synchronized $T\times N$ net-return matrix: four hourly-BTC variants dumped per bar ($0.10\%$ round-trip already subtracted). The matrix has $T{=}21{,}949$ hourly bars, $N{=}4$, common window 2023-12-27 to 2026-06-28 UTC; maximum off-diagonal $|\rho|{=}0.162$ (no cluster collapse); all four clear the $\ge 30$-bet threshold. Annualized Sharpes are all negative ($-0.57,\,-1.45,\,-2.65,\,-2.83$). With $\mathrm{SR}_0{=}1.20\times10^{-2}$ from the cross-trial variance, every DSR is $\approx 0$ (maximum $3.5\times10^{-3}$, all $\ll 0.95$; Table~\ref{tab:dsr}). CSCV PBO is a low $0.032$, but this is \emph{not} evidence of an edge: since all four Sharpes are negative, the in-sample-best variant is merely the ``least bad,'' and $87.3\%$ of OOS splits remain negative—PBO here measures the stability of losers. The White Reality Check (stationary bootstrap, mean block $24$ bars, $2000$ resamples, vs.\ a zero benchmark) gives statistic $-5.25\times10^{-5}$, $p{=}1.000$; the Hansen SPA gives $-0.881$, $p{=}0.994$. The no-edge null is not rejected (Figure~\ref{fig:stat}). Figure~\ref{fig:three} summarizes the three audited claims—one internal accounting bug, one internal execution-assumption inflation, and one external survivorship collapse—each restored to its realistic value.
+
+\begin{table}[t]
+  \caption{Deflated Sharpe Ratio on the BTC-hourly family. SR is annualized as per-bar SR $\times\sqrt{8760}$ (hourly bars); $\mathrm{SR}_0$ from cross-trial variance; empirical skew/kurtosis. These are the synchronized-hourly-matrix versions of each family, \emph{not} the per-asset walk-forward runs of Table~\ref{tab:baseline}: same family label, different sample/window/bet count, so the SRs differ (Asym.\ barrier coincides because its walk-forward run uses the same hourly bars). Every DSR is $\approx 0$; since all Sharpes are negative, no variant can exceed $\mathrm{SR}_0>0$.}
+  \label{tab:dsr}
+  \small
+  \begin{tabular}{lrrr}
+    \toprule
+    Variant & SR (ann.) & DSR & skew / exc.\ kurt \\
+    \midrule
+    TA+funding & $-0.571$ & $\mathbf{3.5\!\times\!10^{-3}}$ & $-3.44$ / $427.9$ \\
+    Risk-reward & $-1.454$ & $2.1\!\times\!10^{-5}$ & $-0.96$ / $66.2$ \\
+    Asym.\ barrier & $-2.833$ & $4.0\!\times\!10^{-9}$ & $+4.61$ / $156.2$ \\
+    GBT barrier & $-2.652$ & $2.1\!\times\!10^{-10}$ & $-3.91$ / $114.3$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig10_stat_confirmation.png}
+  \caption{Statistical check on the synchronized BTC-hourly family: all annualized Sharpes negative, all Deflated Sharpe Ratios $\approx 0$, White Reality Check $p{=}1.000$, Hansen SPA $p{=}0.994$. The no-edge-over-zero null is not rejected (with $N{=}4$, the multiple-testing machinery is nearly uninformative).}
+  \label{fig:stat}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig11_three_caught.png}
+  \caption{The three claims the audit caught, before versus after realism: gold $+173\%\!\to\!-32.7\%$ (accounting bug), basis Sharpe ${\sim}12\!\to\!{<}2$ (execution assumptions), and external momentum Sharpe $1.94\!\to\!0.12$–$0.42$ (survivorship/realism). Each ``attractive'' result reduces to a documented, reproducible artefact.}
+  \label{fig:three}
+\end{figure}
+
+\section{Discussion and Limitations}
+The negative baseline is robust within scope: free hourly/daily OHLCV plus funding/CVD/open interest on liquid majors, walk-forward, causal features, explicit costs, $1\%$ risk. Funding and CVD rank high in feature importance yet never produce stable $\mathrm{PF}>1$ after costs. Volatility targeting reduces drawdown by ${\sim}47$–$50$ pp but leaves Sharpe flat or worse after rebalance drag at hourly frequency (Figure~\ref{fig:vol}); asymmetric barriers drop win-rate ${\sim}25$ pp ($54.6\%{\to}29.2\%$) without rescuing expectancy (Figure~\ref{fig:wr})—a direct illustration that a favourable hit-rate is not positive expectancy when the loss tail is heavy.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig4_winrate_transfer.png}
+  \caption{Win-rate across assets and barrier geometries: the ${\sim}25$ pp drop from symmetric ($54.6\%$) to asymmetric $1.5/0.5$ barriers ($29.2\%$) does not rescue expectancy. Win-rate and profitability are decoupled once the loss tail is fat.}
+  \label{fig:wr}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig5_vol_target_dd.png}
+  \caption{Volatility targeting reduces maximum drawdown by ${\sim}47$–$50$ pp yet leaves Sharpe flat or worse after rebalance drag at hourly frequency—risk is reshaped, not improved on a risk-adjusted basis.}
+  \label{fig:vol}
+\end{figure}
+
+\emph{Limitations.} The rigorous joint CSCV/RC/SPA is valid only for the BTC-hourly family; cross-asset/period variants do not align into a common matrix and carry per-variant DSR only. Several patched cells have tiny $N$ (basis $1$–$2$ entries; one funding-rule cell $n{=}6$) and are marked ``no inference.'' Scope is free data only: paid limit-order-book depth, on-chain cohorts, or higher-frequency paid feeds lie outside budget and may harbor edge. The external reproduction used eight persistent liquid symbols with continuous history since 2018+; the original may have used a broader, survivorship-tilted universe whose exact composition is unavailable. There is no live forward paper-trading beyond the campaign window, and the one-minute micro-flow proxy shows near-zero information coefficient after costs.
+
+\section{Conclusion}
+On the free-data surface commonly accessible to retail researchers, systematic walk-forward, causal labeling, realistic cost subtraction, and a seven-gate skeptical checklist yield a clean negative result: no durable edge across machine-learning, rule, funding, basis, and micro variants. On the one family that admits a synchronized returns matrix, DSR/PBO/RC/SPA fail to reject the no-edge null over a zero benchmark (though with $N{=}4$ the multiple-testing machinery is nearly uninformative, and the result is sign-driven—all sample means are negative). Two internally generated ``attractive'' results were shown to be inflated by an accounting bug (gold) and optimistic pre-patch execution assumptions (basis), and one external public claim collapsed largely under survivorship and missing realism. The contribution is a formalized checklist, worked before/after case studies, and a transparent, fully reproducible negative baseline; the underlying statistical methods are prior art. We recommend that any future claim on public or low-cost data be accompanied by (1) gate-checklist output, (2) DSR/PBO/RC/SPA on a synchronized returns matrix (per-variant DSR otherwise), and (3) an explicit survivorship discussion. All reported numbers are exactly reproducible from a fixed seed, pinned library versions, and SHA-256 input manifests documented alongside the per-variant outputs.
+
+\bibliographystyle{ACM-Reference-Format}
+\begin{thebibliography}{99}
+\small
+\bibitem{bailey2014dsr} D.~H. Bailey and M.~L\'opez de Prado. 2014. The Deflated Sharpe Ratio. \emph{J.\ Portf.\ Manag.} 40, 5 (2014), 94–107.
+\bibitem{bailey2015pbo} D.~H. Bailey, J.~M. Borwein, M.~L\'opez de Prado, and Q.~J. Zhu. 2015. The Probability of Backtest Overfitting. \emph{J.\ Comput.\ Finance} 20, 4 (2015), 39–69.
+\bibitem{lopezdeprado2018} M.~L\'opez de Prado. 2018. \emph{Advances in Financial Machine Learning}. Wiley.
+\bibitem{harvey2019} C.~R. Harvey. 2019. Backtesting. Working paper (SSRN).
+\bibitem{white2000} H.~White. 2000. A Reality Check for Data Snooping. \emph{Econometrica} 68, 5 (2000), 1097–1126.
+\bibitem{hansen2005} P.~R. Hansen. 2005. A Test for Superior Predictive Ability. \emph{J.\ Bus.\ Econ.\ Stat.} 23, 4 (2005), 365–380.
+\bibitem{politis1994} D.~N. Politis and J.~P. Romano. 1994. The Stationary Bootstrap. \emph{J.\ Amer.\ Statist.\ Assoc.} 89, 428 (1994), 1303–1313.
+\bibitem{grinsztajn2022} L.~Grinsztajn, E.~Oyallon, and G.~Varoquaux. 2022. Why Do Tree-Based Models Still Outperform Deep Learning on Tabular Data? \emph{arXiv:2207.08815}.
+\bibitem{shwartzziv2021} R.~Shwartz-Ziv and A.~Armon. 2021. Tabular Data: Deep Learning Is Not All You Need. \emph{arXiv:2106.03253}.
+\bibitem{moreira2017} A.~Moreira and T.~Muir. 2017. Volatility-Managed Portfolios. \emph{J.\ Finance} 72, 4 (2017), 1611–1644.
+\bibitem{deng2025} K.~Deng. 2025. AutoQuant: An Auditable Expert-System Framework for Execution-Constrained Auto-Tuning in Cryptocurrency Perpetual Futures. \emph{arXiv:2512.22476}.
+\bibitem{liu2021} Y.~Liu and A.~Tsyvinski. 2021. Risks and Returns of Cryptocurrency. \emph{Rev.\ Financ.\ Stud.} 34, 6 (2021), 2689–2727.
+\bibitem{makarov2020} I.~Makarov and A.~Schoar. 2020. Trading and Arbitrage in Cryptocurrency Markets. \emph{J.\ Financ.\ Econ.} 135, 2 (2020), 293–319.
+\end{thebibliography}
+
+\end{document}

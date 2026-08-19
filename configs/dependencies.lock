@@ -1,0 +1,15 @@
+# Tested dependency bounds for the public release (Python 3.11+).
+# Core statistical audit
+numpy>=1.26,<3
+pandas>=2.2,<3
+scipy>=1.11,<2
+
+# Figure and manuscript regeneration
+matplotlib>=3.8,<4
+markdown>=3.6,<4
+pypdf>=6,<7
+xhtml2pdf>=0.2.11,<1
+
+# Validation
+pytest>=8,<10
+PyYAML>=6,<7

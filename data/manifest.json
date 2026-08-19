@@ -1,0 +1,17 @@
+{
+  "release_id": "20260630_public_release",
+  "files": [
+    {
+      "path": "data/processed/returns_matrix.csv",
+      "sha256": "e870f7ae0cda43cd3e1f16078b12d753464dfc0d92fca3a3062c0f95b184366c",
+      "bytes": 954670,
+      "role": "Aligned per-bar net returns for four BTC hourly variants"
+    }
+  ],
+  "time_axis": {
+    "rows": 21949,
+    "start_utc": "2023-12-27T01:00:00Z",
+    "end_utc": "2026-06-28T13:00:00Z",
+    "frequency": "1h"
+  }
+}
