@@ -1,3 +1,10 @@
+---
+title: Scientific Results Compatibility Page
+status: result annex
+last_updated: 2026-08-19
+paper_source: false
+---
+
 # Scientific results
 
 The strategy campaign covers LightGBM triple-barrier classification, LSTM

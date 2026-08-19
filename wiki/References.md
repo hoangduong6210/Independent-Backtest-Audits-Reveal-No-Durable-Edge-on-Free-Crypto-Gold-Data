@@ -1,3 +1,10 @@
+---
+title: References
+status: bibliography annex
+last_updated: 2026-08-19
+paper_source: false
+---
+
 # References
 
 Core methods include Bailey and Lopez de Prado (Deflated Sharpe Ratio), Bailey

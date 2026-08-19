@@ -1,3 +1,10 @@
+---
+title: Full Manuscript Pointer
+status: publication annex
+last_updated: 2026-08-19
+paper_source: false
+---
+
 # Full manuscript
 
 Read the [current Markdown manuscript](../paper/current_state/manuscript.md) or

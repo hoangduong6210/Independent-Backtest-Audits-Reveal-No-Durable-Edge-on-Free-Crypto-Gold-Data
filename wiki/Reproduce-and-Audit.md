@@ -1,3 +1,10 @@
+---
+title: Reproduce and Audit Compatibility Page
+status: operational annex
+last_updated: 2026-08-19
+paper_source: false
+---
+
 # Reproduce and audit
 
 From the repository root:

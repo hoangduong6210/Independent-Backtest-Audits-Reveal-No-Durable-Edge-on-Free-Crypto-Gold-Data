@@ -1,3 +1,10 @@
+---
+title: Authoring and Snapshots Compatibility Page
+status: publication annex
+last_updated: 2026-08-19
+paper_source: false
+---
+
 # Authoring and snapshots
 
 The full Markdown manuscript in `paper/current_state/` is authoritative for the

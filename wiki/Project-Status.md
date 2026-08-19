@@ -1,3 +1,10 @@
+---
+title: Project Status Compatibility Page
+status: status annex
+last_updated: 2026-08-19
+paper_source: false
+---
+
 # Project status
 
 Current evidence release: `20260630_public_release`.

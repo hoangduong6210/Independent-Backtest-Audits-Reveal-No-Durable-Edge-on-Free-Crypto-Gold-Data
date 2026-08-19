@@ -1,3 +1,10 @@
+---
+title: Audit Protocol Compatibility Page
+status: detailed method annex
+last_updated: 2026-08-19
+paper_source: false
+---
+
 # Audit protocol
 
 The audit proceeds from accounting to inference:
